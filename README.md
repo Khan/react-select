@@ -6,7 +6,9 @@
 
 React-Select
 ============
+**This KA-specific fork has been made to work with our module system. For details on how to update the library, see [README-KA.md](README-KA.md)**
 
+============
 A Select control built with and for [React](http://facebook.github.io/react/index.html). Initially built for use in [KeystoneJS](http://www.keystonejs.com).
 
 
