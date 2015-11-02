@@ -9,6 +9,12 @@ The original React Select library is divided into three folders:
 
 We should only ever be dealing with `src`.
 
+## What are we doing here?
+
+This library depends on a few third-party packages of its own; this confuses our packager if we use it directly. To get around this, we use `browserify` to bundle everything up into a single file in advance.
+
+We don't want to bundle React in with our little bundle, because React is big. It also gives us errors if there are multiple instances loaded onto the same page. We use browserify-shim for this; it lets us require `window.React` in place of a bundled version.
+
 ## Updating this library
 First, navigate to the submodule directory and checkout master:
 
@@ -29,6 +35,15 @@ Next, make your changes. Develop locally in `src`, or pull changes from the [ups
 ```
 git remote add upstream https://github.com/JedWatson/react-select.git
 git p upstream
+```
+
+As of React 0.14, ReactDOM is split into its own module. It requires `react/lib/ReactDOM`, which confuses browserify-shim and breaks a few things.
+
+The quickest solution _(ahem... hack)_ that I've found for this is:
+
+```bash
+open ./node_modules/react-select/package.json
+# Change "main" entry to "dist/react-dom.js"
 ```
 
 Finally, we have to build a bundle for our package system. Running:

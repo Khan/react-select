@@ -1375,6 +1375,172 @@ describe('Select', () => {
 		});
 	});
 
+	describe('with async options (using promises)', () => {
+
+		var asyncOptions, callCount, callInput;
+
+		beforeEach(() => {
+
+			asyncOptions = sinon.spy((input) => {
+			  const options = [
+					{ value: 'test', label: 'TEST one' },
+					{ value: 'test2', label: 'TEST two' },
+					{ value: 'tell', label: 'TELL three' }
+				].filter((elm) => {
+				  return (elm.value.indexOf(input) !== -1 || elm.label.indexOf(input) !== -1);
+				});
+
+				return new Promise((resolve, reject) => {
+					input === '_FAIL'? reject('nope') : resolve({options: options});
+				})
+			});
+		});
+
+		describe('[mocked promise]', () => {
+
+			beforeEach(() => {
+
+				// Render an instance of the component
+				wrapper = createControlWithWrapper({
+					value: '',
+					asyncOptions: asyncOptions,
+					autoload: true
+				});
+			});
+
+			it('should fulfill asyncOptions promise', () => {
+				return expect(instance.props.asyncOptions(''), 'to be fulfilled');
+			});
+
+			it('should fulfill with 3 options when asyncOptions promise with input = "te"', () => {
+				return expect(instance.props.asyncOptions('te'), 'to be fulfilled with', {
+					options: [
+						{ value: 'test', label: 'TEST one' },
+						{ value: 'test2', label: 'TEST two' },
+						{ value: 'tell', label: 'TELL three' }
+					]
+				});
+			});
+
+			it('should fulfill with 2 options when asyncOptions promise with input = "tes"', () => {
+				return expect(instance.props.asyncOptions('tes'), 'to be fulfilled with', {
+					options: [
+						{ value: 'test', label: 'TEST one' },
+						{ value: 'test2', label: 'TEST two' }
+					]
+				});
+			});
+
+			it('should reject when asyncOptions promise with input = "_FAIL"', () => {
+				return expect(instance.props.asyncOptions('_FAIL'), 'to be rejected');
+			});
+		});
+
+		describe('with autoload=true', () => {
+
+			beforeEach(() => {
+
+				// Render an instance of the component
+				wrapper = createControlWithWrapper({
+					value: '',
+					asyncOptions: asyncOptions,
+					autoload: true
+				});
+			});
+
+			it('should be called once at the beginning', () => {
+				expect(asyncOptions, 'was called');
+			});
+
+			it('calls the asyncOptions again when the input changes', () => {
+
+				typeSearchText('ab');
+
+				expect(asyncOptions, 'was called twice');
+				expect(asyncOptions, 'was called with', 'ab');
+			});
+
+			it('shows the returned options after asyncOptions promise is resolved', (done) => {
+
+				typeSearchText('te');
+
+				return asyncOptions.secondCall.returnValue.then(() => {
+					setTimeout(() => {
+						expect(ReactDOM.findDOMNode(instance), 'queried for', '.Select-option',
+							'to satisfy', [
+								expect.it('to have text', 'TEST one'),
+								expect.it('to have text', 'TEST two'),
+								expect.it('to have text', 'TELL three')
+							]);
+						done();
+					});
+				});
+
+			});
+
+			it('doesn\'t update the returned options when asyncOptions is rejected', (done) => {
+
+				typeSearchText('te');
+				expect(asyncOptions, 'was called with', 'te');
+
+				asyncOptions.secondCall.returnValue.then(() => {
+					setTimeout(() => {
+						expect(ReactDOM.findDOMNode(instance), 'queried for', '.Select-option',
+							'to satisfy', [
+								expect.it('to have text', 'TEST one'),
+								expect.it('to have text', 'TEST two'),
+								expect.it('to have text', 'TELL three')
+							]);
+
+						// asyncOptions mock is set to reject the promise when invoked with '_FAIL'
+						typeSearchText('_FAIL');
+						expect(asyncOptions, 'was called with', '_FAIL');
+
+						asyncOptions.thirdCall.returnValue.then(null, () => {
+							setTimeout(() => {
+								expect(ReactDOM.findDOMNode(instance), 'queried for', '.Select-option',
+									'to satisfy', [
+										expect.it('to have text', 'TEST one'),
+										expect.it('to have text', 'TEST two'),
+										expect.it('to have text', 'TELL three')
+									]);
+
+								done();
+							});
+
+						});
+					});
+
+				});
+			});
+
+		});
+
+		describe('with autoload=false', () => {
+
+			beforeEach(() => {
+
+				// Render an instance of the component
+				instance = createControl({
+					value: '',
+					asyncOptions: asyncOptions,
+					autoload: false
+				});
+			});
+
+			it('does not initially call asyncOptions', () => {
+				expect(asyncOptions, 'was not called');
+			});
+
+			it('calls the asyncOptions on first key entry', () => {
+
+				typeSearchText('a');
+				expect(asyncOptions, 'was called once');
+				expect(asyncOptions, 'was called with', 'a');
+			});
+		});
+	});
+
 	describe('with multi-select', () => {
 
 		beforeEach(() => {
@@ -1815,7 +1981,7 @@ describe('Select', () => {
 
 			it('uses the prop as the title for clear', () => {
 
-				expect(ReactDOM.findDOMNode(instance).querySelector('.Select-clear'), 'to have attributes', {
+				expect(ReactDOM.findDOMNode(instance).querySelector('.Select-clear-zone'), 'to have attributes', {
 					title: 'Remove All Items Test Title'
 				});
 			});
@@ -1837,7 +2003,7 @@ describe('Select', () => {
 
 			it('uses the prop as the title for clear', () => {
 
-				expect(ReactDOM.findDOMNode(instance).querySelector('.Select-clear'), 'to have attributes', {
+				expect(ReactDOM.findDOMNode(instance).querySelector('.Select-clear-zone'), 'to have attributes', {
 					title: 'Remove Value Test Title'
 				});
 			});
@@ -2498,7 +2664,7 @@ describe('Select', () => {
 			});
 
 			it('disabled option link is still clickable', () => {
-				var selectArrow = React.findDOMNode(instance).querySelector('.Select-arrow');
+				var selectArrow = ReactDOM.findDOMNode(instance).querySelector('.Select-arrow');
 				var selectArrow = ReactDOM.findDOMNode(instance).querySelector('.Select-arrow');
 				TestUtils.Simulate.mouseDown(selectArrow);
 				var options = ReactDOM.findDOMNode(instance).querySelectorAll('.Select-option');
