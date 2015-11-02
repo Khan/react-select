@@ -29,14 +29,16 @@ Make sure that you've got all the local dependencies you need by running:
 npm install
 ```
 
-Next, make your changes. Develop locally in `src`, or pull changes from the [upstream branch](https://github.com/JedWatson/react-select):
+Next, make your changes. You might want to pull changes from the [upstream branch](https://github.com/JedWatson/react-select):
 
 ```
 git remote add upstream https://github.com/JedWatson/react-select.git
 git p upstream
 ```
 
-As of React 0.14, ReactDOM is split into its own module. It requires `react/lib/ReactDOM`, which confuses browserify-shim and breaks a few things.
+If you want to make style changes, edit files in `less/` and run `gulp build`. At some point the library [might transition to scss or jss](https://github.com/JedWatson/react-select/issues/541).
+
+If you want to make JS changes, develop locally in `src`. As of React 0.14, ReactDOM is split into its own module. It requires `react/lib/ReactDOM`, which confuses browserify-shim and breaks a few things.
 
 The quickest solution _(ahem... hack)_ that I've found for this is:
 
@@ -45,13 +47,14 @@ open ./node_modules/react-select/package.json
 # Change "main" entry to "dist/react-dom.js"
 ```
 
-
-Finally, we have to build a bundle for our package system. Running:
+Finally, we have to build a bundle for our KA packages. Running:
 
 ```
 make
 ```
 
 should do it.
+
+-----
 
 Once you're done with those steps, the library should be good to go! Run through your regular `arc` / `git` workflow, push to master (eventually), and update `webapp` to use the most recent version!
