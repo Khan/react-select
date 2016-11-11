@@ -43,9 +43,12 @@ If you want to make JS changes, develop locally in `src`. As of React 0.14, Reac
 The quickest solution _(ahem... hack)_ that I've found for this is:
 
 ```bash
-open ./node_modules/react-select/package.json
-# Change "main" entry to "dist/react-dom.js"
+open ./node_modules/react-dom/package.json
+# Change "main" entry from index.js to "dist/react-dom.js"
 ```
+
+^ NOTE: the above will need to be done each time you update the library
+since node_modules is not checked in.
 
 Finally, we have to build a bundle for our KA packages. Running:
 
