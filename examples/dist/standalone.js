@@ -788,7 +788,7 @@ var _react = (typeof window !== "undefined" ? window['React'] : typeof global !=
 
 var _react2 = _interopRequireDefault(_react);
 
-var _reactDom = require('react-dom');
+var _reactDom = (typeof window !== "undefined" ? window['React']['__internalReactDOM'] : typeof global !== "undefined" ? global['React']['__internalReactDOM'] : null);
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
 
@@ -1993,7 +1993,7 @@ exports['default'] = Select;
 module.exports = exports['default'];
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Async":1,"./AsyncCreatable":2,"./Creatable":3,"./Option":4,"./Value":6,"./utils/defaultArrowRenderer":7,"./utils/defaultClearRenderer":8,"./utils/defaultFilterOptions":9,"./utils/defaultMenuRenderer":10,"classnames":undefined,"react-dom":undefined,"react-input-autosize":undefined}],6:[function(require,module,exports){
+},{"./Async":1,"./AsyncCreatable":2,"./Creatable":3,"./Option":4,"./Value":6,"./utils/defaultArrowRenderer":7,"./utils/defaultClearRenderer":8,"./utils/defaultFilterOptions":9,"./utils/defaultMenuRenderer":10,"classnames":undefined,"react-input-autosize":undefined}],6:[function(require,module,exports){
 (function (global){
 'use strict';
 

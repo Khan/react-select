@@ -50,52 +50,6 @@
 
 },{}],2:[function(require,module,exports){
 (function (global){
-/**
- * ReactDOM v15.3.2
- *
- * Copyright 2013-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- *
- */
-// Based off https://github.com/ForbesLindesay/umd/blob/master/template.js
-;(function(f) {
-  // CommonJS
-  if (typeof exports === "object" && typeof module !== "undefined") {
-    module.exports = f((typeof window !== "undefined" ? window['React'] : typeof global !== "undefined" ? global['React'] : null));
-
-  // RequireJS
-  } else if (typeof define === "function" && define.amd) {
-    define(['react'], f);
-
-  // <script>
-  } else {
-    var g;
-    if (typeof window !== "undefined") {
-      g = window;
-    } else if (typeof global !== "undefined") {
-      g = global;
-    } else if (typeof self !== "undefined") {
-      g = self;
-    } else {
-      // works providing we're not in "use strict";
-      // needed for Java 8 Nashorn
-      // see https://github.com/facebook/react/issues/3037
-      g = this;
-    }
-    g.ReactDOM = f(g.React);
-  }
-
-})(function(React) {
-  return React.__SECRET_DOM_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
-});
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],3:[function(require,module,exports){
-(function (global){
 'use strict';
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
@@ -226,7 +180,7 @@ var AutosizeInput = React.createClass({
 
 module.exports = AutosizeInput;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],4:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -442,6 +396,11 @@ var Async = (function (_Component) {
 			return searchPromptText;
 		}
 	}, {
+		key: 'focus',
+		value: function focus() {
+			this.select.focus();
+		}
+	}, {
 		key: 'render',
 		value: function render() {
 			var _this3 = this;
@@ -462,7 +421,7 @@ var Async = (function (_Component) {
 					return _this3.select = _ref;
 				},
 				onChange: function onChange(newValues) {
-					if (_this3.props.value && newValues.length > _this3.props.value.length) {
+					if (_this3.props.multi && _this3.props.value && newValues.length > _this3.props.value.length) {
 						_this3.clearOptions();
 					}
 					_this3.props.onChange(newValues);
@@ -490,7 +449,7 @@ function defaultChildren(props) {
 module.exports = exports['default'];
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Select":8,"./utils/stripDiacritics":13}],5:[function(require,module,exports){
+},{"./Select":7,"./utils/stripDiacritics":13}],4:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -506,6 +465,16 @@ var _Select = require('./Select');
 
 var _Select2 = _interopRequireDefault(_Select);
 
+function reduce(obj) {
+	var props = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+	return Object.keys(obj).reduce(function (props, key) {
+		var value = obj[key];
+		if (value !== undefined) props[key] = value;
+		return props;
+	}, props);
+}
+
 var AsyncCreatable = _react2['default'].createClass({
 	displayName: 'AsyncCreatableSelect',
 
@@ -520,10 +489,14 @@ var AsyncCreatable = _react2['default'].createClass({
 					_Select2['default'].Creatable,
 					_this.props,
 					function (creatableProps) {
-						return _react2['default'].createElement(_Select2['default'], _extends({}, asyncProps, creatableProps, {
+						return _react2['default'].createElement(_Select2['default'], _extends({}, reduce(asyncProps, reduce(creatableProps, {})), {
 							onInputChange: function (input) {
 								creatableProps.onInputChange(input);
 								return asyncProps.onInputChange(input);
+							},
+							ref: function (ref) {
+								creatableProps.ref(ref);
+								asyncProps.ref(ref);
 							}
 						}));
 					}
@@ -536,7 +509,7 @@ var AsyncCreatable = _react2['default'].createClass({
 module.exports = AsyncCreatable;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Select":8}],6:[function(require,module,exports){
+},{"./Select":7}],5:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -590,8 +563,14 @@ var Creatable = _react2['default'].createClass({
 		// ({ label: string, labelKey: string, valueKey: string }): Object
 		newOptionCreator: _react2['default'].PropTypes.func,
 
+		// input change handler: function (inputValue) {}
+		onInputChange: _react2['default'].PropTypes.func,
+
 		// input keyDown handler: function (event) {}
 		onInputKeyDown: _react2['default'].PropTypes.func,
+
+		// new option click handler: function (option) {}
+		onNewOptionClick: _react2['default'].PropTypes.func,
 
 		// See Select.propTypes.options
 		options: _react2['default'].PropTypes.array,
@@ -629,6 +608,7 @@ var Creatable = _react2['default'].createClass({
 		var _props = this.props;
 		var isValidNewOption = _props.isValidNewOption;
 		var newOptionCreator = _props.newOptionCreator;
+		var onNewOptionClick = _props.onNewOptionClick;
 		var _props$options = _props.options;
 		var options = _props$options === undefined ? [] : _props$options;
 		var shouldKeyDownEventCreateNewOption = _props.shouldKeyDownEventCreateNewOption;
@@ -639,9 +619,13 @@ var Creatable = _react2['default'].createClass({
 
 			// Don't add the same option twice.
 			if (_isOptionUnique) {
-				options.unshift(option);
+				if (onNewOptionClick) {
+					onNewOptionClick(option);
+				} else {
+					options.unshift(option);
 
-				this.select.selectValue(option);
+					this.select.selectValue(option);
+				}
 			}
 		}
 	},
@@ -711,11 +695,18 @@ var Creatable = _react2['default'].createClass({
 		var menuRenderer = this.props.menuRenderer;
 
 		return menuRenderer(_extends({}, params, {
-			onSelect: this.onOptionSelect
+			onSelect: this.onOptionSelect,
+			selectValue: this.onOptionSelect
 		}));
 	},
 
 	onInputChange: function onInputChange(input) {
+		var onInputChange = this.props.onInputChange;
+
+		if (onInputChange) {
+			onInputChange(input);
+		}
+
 		// This value may be needed in between Select mounts (when this.select is null)
 		this.inputValue = input;
 	},
@@ -749,12 +740,19 @@ var Creatable = _react2['default'].createClass({
 		var _this = this;
 
 		var _props4 = this.props;
-		var _props4$children = _props4.children;
-		var children = _props4$children === undefined ? defaultChildren : _props4$children;
 		var newOptionCreator = _props4.newOptionCreator;
 		var shouldKeyDownEventCreateNewOption = _props4.shouldKeyDownEventCreateNewOption;
 
-		var restProps = _objectWithoutProperties(_props4, ['children', 'newOptionCreator', 'shouldKeyDownEventCreateNewOption']);
+		var restProps = _objectWithoutProperties(_props4, ['newOptionCreator', 'shouldKeyDownEventCreateNewOption']);
+
+		var children = this.props.children;
+
+		// We can't use destructuring default values to set the children,
+		// because it won't apply work if `children` is null. A falsy check is
+		// more reliable in real world use-cases.
+		if (!children) {
+			children = defaultChildren;
+		}
 
 		var props = _extends({}, restProps, {
 			allowCreate: true,
@@ -831,7 +829,7 @@ function shouldKeyDownEventCreateNewOption(_ref6) {
 module.exports = Creatable;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Select":8,"./utils/defaultFilterOptions":11,"./utils/defaultMenuRenderer":12}],7:[function(require,module,exports){
+},{"./Select":7,"./utils/defaultFilterOptions":11,"./utils/defaultMenuRenderer":12}],6:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -946,7 +944,7 @@ var Option = _react2['default'].createClass({
 module.exports = Option;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"classnames":1}],8:[function(require,module,exports){
+},{"classnames":1}],7:[function(require,module,exports){
 (function (global){
 /*!
   Copyright (c) 2016 Jed Watson.
@@ -972,7 +970,7 @@ var _react = (typeof window !== "undefined" ? window['React'] : typeof global !=
 
 var _react2 = _interopRequireDefault(_react);
 
-var _reactDom = require('react-dom');
+var _reactDom = (typeof window !== "undefined" ? window['React']['__internalReactDOM'] : typeof global !== "undefined" ? global['React']['__internalReactDOM'] : null);
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
 
@@ -995,6 +993,10 @@ var _utilsDefaultFilterOptions2 = _interopRequireDefault(_utilsDefaultFilterOpti
 var _utilsDefaultMenuRenderer = require('./utils/defaultMenuRenderer');
 
 var _utilsDefaultMenuRenderer2 = _interopRequireDefault(_utilsDefaultMenuRenderer);
+
+var _utilsDefaultClearRenderer = require('./utils/defaultClearRenderer');
+
+var _utilsDefaultClearRenderer2 = _interopRequireDefault(_utilsDefaultClearRenderer);
 
 var _Async = require('./Async');
 
@@ -1049,6 +1051,7 @@ var Select = _react2['default'].createClass({
 		backspaceToRemoveMessage: _react2['default'].PropTypes.string, // Message to use for screenreaders to press backspace to remove the current item - {label} is replaced with the item label
 		className: _react2['default'].PropTypes.string, // className for the outer element
 		clearAllText: stringOrNode, // title for the "clear" control when multi: true
+		clearRenderer: _react2['default'].PropTypes.func, // create clearable x element
 		clearValueText: stringOrNode, // title for the "clear" control
 		clearable: _react2['default'].PropTypes.bool, // should it be possible to reset value
 		deleteRemoves: _react2['default'].PropTypes.bool, // whether backspace removes an item if there is no text input
@@ -1119,6 +1122,7 @@ var Select = _react2['default'].createClass({
 			backspaceToRemoveMessage: 'Press backspace to remove {label}',
 			clearable: true,
 			clearAllText: 'Clear all',
+			clearRenderer: _utilsDefaultClearRenderer2['default'],
 			clearValueText: 'Clear value',
 			deleteRemoves: true,
 			delimiter: ',',
@@ -1351,7 +1355,7 @@ var Select = _react2['default'].createClass({
 			});
 		} else {
 			// otherwise, focus the input and open the menu
-			this._openAfterFocus = true;
+			this._openAfterFocus = this.props.openOnFocus;
 			this.focus();
 		}
 	},
@@ -1650,7 +1654,18 @@ var Select = _react2['default'].createClass({
 
 	addValue: function addValue(value) {
 		var valueArray = this.getValueArray(this.props.value);
+		var visibleOptions = this._visibleOptions.filter(function (val) {
+			return !val.disabled;
+		});
+		var lastValueIndex = visibleOptions.indexOf(value);
 		this.setValue(valueArray.concat(value));
+		if (visibleOptions.length - 1 === lastValueIndex) {
+			// the last option was selected; focus the second-last one
+			this.focusOption(visibleOptions[lastValueIndex - 1]);
+		} else if (visibleOptions.length > lastValueIndex) {
+			// focus the option below the selected one
+			this.focusOption(visibleOptions[lastValueIndex + 1]);
+		}
 	},
 
 	popValue: function popValue() {
@@ -1734,7 +1749,7 @@ var Select = _react2['default'].createClass({
 			this.setState({
 				isOpen: true,
 				inputValue: '',
-				focusedOption: this._focusedOption || options[dir === 'next' ? 0 : options.length - 1].option
+				focusedOption: this._focusedOption || (options.length ? options[dir === 'next' ? 0 : options.length - 1].option : null)
 			});
 			return;
 		}
@@ -1858,74 +1873,75 @@ var Select = _react2['default'].createClass({
 	},
 
 	renderInput: function renderInput(valueArray, focusedOptionIndex) {
-		var _this5 = this;
+		var _classNames,
+		    _this5 = this;
+
+		var className = (0, _classnames2['default'])('Select-input', this.props.inputProps.className);
+		var isOpen = !!this.state.isOpen;
+
+		var ariaOwns = (0, _classnames2['default'])((_classNames = {}, _defineProperty(_classNames, this._instancePrefix + '-list', isOpen), _defineProperty(_classNames, this._instancePrefix + '-backspace-remove-message', this.props.multi && !this.props.disabled && this.state.isFocused && !this.state.inputValue), _classNames));
+
+		// TODO: Check how this project includes Object.assign()
+		var inputProps = Object.assign({}, this.props.inputProps, {
+			role: 'combobox',
+			'aria-expanded': '' + isOpen,
+			'aria-owns': ariaOwns,
+			'aria-haspopup': '' + isOpen,
+			'aria-activedescendant': isOpen ? this._instancePrefix + '-option-' + focusedOptionIndex : this._instancePrefix + '-value',
+			'aria-labelledby': this.props['aria-labelledby'],
+			'aria-label': this.props['aria-label'],
+			className: className,
+			tabIndex: this.props.tabIndex,
+			onBlur: this.handleInputBlur,
+			onChange: this.handleInputChange,
+			onFocus: this.handleInputFocus,
+			ref: function ref(_ref) {
+				return _this5.input = _ref;
+			},
+			required: this.state.required,
+			value: this.state.inputValue
+		});
 
 		if (this.props.inputRenderer) {
-			return this.props.inputRenderer();
-		} else {
-			var _classNames;
-
-			var className = (0, _classnames2['default'])('Select-input', this.props.inputProps.className);
-			var isOpen = !!this.state.isOpen;
-
-			var ariaOwns = (0, _classnames2['default'])((_classNames = {}, _defineProperty(_classNames, this._instancePrefix + '-list', isOpen), _defineProperty(_classNames, this._instancePrefix + '-backspace-remove-message', this.props.multi && !this.props.disabled && this.state.isFocused && !this.state.inputValue), _classNames));
-
-			// TODO: Check how this project includes Object.assign()
-			var inputProps = Object.assign({}, this.props.inputProps, {
-				role: 'combobox',
-				'aria-expanded': '' + isOpen,
-				'aria-owns': ariaOwns,
-				'aria-haspopup': '' + isOpen,
-				'aria-activedescendant': isOpen ? this._instancePrefix + '-option-' + focusedOptionIndex : this._instancePrefix + '-value',
-				'aria-labelledby': this.props['aria-labelledby'],
-				'aria-label': this.props['aria-label'],
-				className: className,
-				tabIndex: this.props.tabIndex,
-				onBlur: this.handleInputBlur,
-				onChange: this.handleInputChange,
-				onFocus: this.handleInputFocus,
-				ref: function ref(_ref) {
-					return _this5.input = _ref;
-				},
-				required: this.state.required,
-				value: this.state.inputValue
-			});
-
-			if (this.props.disabled || !this.props.searchable) {
-				var _props$inputProps = this.props.inputProps;
-				var inputClassName = _props$inputProps.inputClassName;
-
-				var divProps = _objectWithoutProperties(_props$inputProps, ['inputClassName']);
-
-				return _react2['default'].createElement('div', _extends({}, divProps, {
-					role: 'combobox',
-					'aria-expanded': isOpen,
-					'aria-owns': isOpen ? this._instancePrefix + '-list' : this._instancePrefix + '-value',
-					'aria-activedescendant': isOpen ? this._instancePrefix + '-option-' + focusedOptionIndex : this._instancePrefix + '-value',
-					className: className,
-					tabIndex: this.props.tabIndex || 0,
-					onBlur: this.handleInputBlur,
-					onFocus: this.handleInputFocus,
-					ref: function (ref) {
-						return _this5.input = ref;
-					},
-					'aria-readonly': '' + !!this.props.disabled,
-					style: { border: 0, width: 1, display: 'inline-block' } }));
-			}
-
-			if (this.props.autosize) {
-				return _react2['default'].createElement(_reactInputAutosize2['default'], _extends({}, inputProps, { minWidth: '5' }));
-			}
-			return _react2['default'].createElement(
-				'div',
-				{ className: className },
-				_react2['default'].createElement('input', inputProps)
-			);
+			return this.props.inputRenderer(inputProps);
 		}
+
+		if (this.props.disabled || !this.props.searchable) {
+			var _props$inputProps = this.props.inputProps;
+			var inputClassName = _props$inputProps.inputClassName;
+
+			var divProps = _objectWithoutProperties(_props$inputProps, ['inputClassName']);
+
+			return _react2['default'].createElement('div', _extends({}, divProps, {
+				role: 'combobox',
+				'aria-expanded': isOpen,
+				'aria-owns': isOpen ? this._instancePrefix + '-list' : this._instancePrefix + '-value',
+				'aria-activedescendant': isOpen ? this._instancePrefix + '-option-' + focusedOptionIndex : this._instancePrefix + '-value',
+				className: className,
+				tabIndex: this.props.tabIndex || 0,
+				onBlur: this.handleInputBlur,
+				onFocus: this.handleInputFocus,
+				ref: function (ref) {
+					return _this5.input = ref;
+				},
+				'aria-readonly': '' + !!this.props.disabled,
+				style: { border: 0, width: 1, display: 'inline-block' } }));
+		}
+
+		if (this.props.autosize) {
+			return _react2['default'].createElement(_reactInputAutosize2['default'], _extends({}, inputProps, { minWidth: '5' }));
+		}
+		return _react2['default'].createElement(
+			'div',
+			{ className: className },
+			_react2['default'].createElement('input', inputProps)
+		);
 	},
 
 	renderClear: function renderClear() {
 		if (!this.props.clearable || !this.props.value || this.props.value === 0 || this.props.multi && !this.props.value.length || this.props.disabled || this.props.isLoading) return;
+		var clear = this.props.clearRenderer();
+
 		return _react2['default'].createElement(
 			'span',
 			{ className: 'Select-clear-zone', title: this.props.multi ? this.props.clearAllText : this.props.clearValueText,
@@ -1935,13 +1951,14 @@ var Select = _react2['default'].createClass({
 				onTouchMove: this.handleTouchMove,
 				onTouchEnd: this.handleTouchEndClearValue
 			},
-			_react2['default'].createElement('span', { className: 'Select-clear', dangerouslySetInnerHTML: { __html: '&times;' } })
+			clear
 		);
 	},
 
 	renderArrow: function renderArrow() {
 		var onMouseDown = this.handleMouseDownOnArrow;
-		var arrow = this.props.arrowRenderer({ onMouseDown: onMouseDown });
+		var isOpen = this.state.isOpen;
+		var arrow = this.props.arrowRenderer({ onMouseDown: onMouseDown, isOpen: isOpen });
 
 		return _react2['default'].createElement(
 			'span',
@@ -2158,7 +2175,7 @@ exports['default'] = Select;
 module.exports = exports['default'];
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Async":4,"./AsyncCreatable":5,"./Creatable":6,"./Option":7,"./Value":9,"./utils/defaultArrowRenderer":10,"./utils/defaultFilterOptions":11,"./utils/defaultMenuRenderer":12,"classnames":1,"react-dom":2,"react-input-autosize":3}],9:[function(require,module,exports){
+},{"./Async":3,"./AsyncCreatable":4,"./Creatable":5,"./Option":6,"./Value":8,"./utils/defaultArrowRenderer":9,"./utils/defaultClearRenderer":10,"./utils/defaultFilterOptions":11,"./utils/defaultMenuRenderer":12,"classnames":1,"react-input-autosize":2}],8:[function(require,module,exports){
 (function (global){
 'use strict';
 
@@ -2268,7 +2285,7 @@ var Value = _react2['default'].createClass({
 module.exports = Value;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"classnames":1}],10:[function(require,module,exports){
+},{"classnames":1}],9:[function(require,module,exports){
 (function (global){
 "use strict";
 
@@ -2294,6 +2311,32 @@ function arrowRenderer(_ref) {
 
 ;
 module.exports = exports["default"];
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],10:[function(require,module,exports){
+(function (global){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+	value: true
+});
+exports['default'] = clearRenderer;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _react = (typeof window !== "undefined" ? window['React'] : typeof global !== "undefined" ? global['React'] : null);
+
+var _react2 = _interopRequireDefault(_react);
+
+function clearRenderer() {
+	return _react2['default'].createElement('span', {
+		className: 'Select-clear',
+		dangerouslySetInnerHTML: { __html: '&times;' }
+	});
+}
+
+;
+module.exports = exports['default'];
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],11:[function(require,module,exports){
@@ -2417,5 +2460,5 @@ module.exports = function stripDiacritics(str) {
 	return str;
 };
 
-},{}]},{},[8])(8)
+},{}]},{},[7])(7)
 });

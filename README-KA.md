@@ -38,22 +38,10 @@ git p upstream
 
 If you want to make style changes, edit files in `less/` and run `gulp build`. At some point the library [might transition to scss or jss](https://github.com/JedWatson/react-select/issues/541).
 
-If you want to make JS changes, develop locally in `src`. As of React 0.14, ReactDOM is split into its own module. It requires `react/lib/ReactDOM`, which confuses browserify-shim and breaks a few things.
-
-The quickest solution _(ahem... hack)_ that I've found for this is:
-
-```bash
-open ./node_modules/react-dom/package.json
-# Change "main" entry from index.js to "dist/react-dom.js"
-```
-
-^ NOTE: the above will need to be done each time you update the library
-since node_modules is not checked in.
-
 Finally, we have to build a bundle for our KA packages. Running:
 
 ```
-make
+npm run build-ka
 ```
 
 should do it.
