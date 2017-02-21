@@ -2255,6 +2255,23 @@ describe('Select', () => {
 			});
 		});
 
+		describe('clearRenderer', () => {
+
+			beforeEach(() => {
+				instance = createControl({
+					clearable: true,
+					value: 'three',
+					clearRenderer: () => <span className="Select-custom-clear">O</span>,
+					options: defaultOptions
+				});
+			});
+
+			it('renders a custom clear', () => {
+
+				expect(instance, 'to contain', <span className="Select-custom-clear">O</span>);
+			});
+		});
+
 		describe('clearValueText', () => {
 
 			beforeEach(() => {
@@ -3061,6 +3078,40 @@ describe('Select', () => {
 			});
 		});
 
+		describe('inputRenderer', () => {
+
+			var inputRenderer;
+
+			beforeEach(() => {
+
+				inputRenderer = (inputProps) => {
+					return (
+						<input id="custom-input" type="text" />
+					);
+				};
+
+				inputRenderer = sinon.spy(inputRenderer);
+
+				instance = createControl({
+					options: defaultOptions,
+					inputRenderer: inputRenderer
+				});
+			});
+
+			it('renders the options using the inputRenderer', () => {
+				var input = ReactDOM.findDOMNode(instance).querySelector('#custom-input');
+				expect(input, 'not to equal', undefined);
+			});
+
+			it('calls the renderer exactly once', () => {
+				expect(inputRenderer, 'was called times', 1);
+			});
+
+			it('calls the renderer with props', () => {
+				expect(inputRenderer, 'was called with', { value: '', className: 'Select-input' });
+			});
+		});
+
 		describe('optionRenderer', () => {
 
 			var optionRenderer;
@@ -3827,6 +3878,19 @@ describe('Select', () => {
 					});
 
 			});
+		});
+	});
+
+	describe('.focus()', () => {
+		beforeEach(() => {
+			instance = createControl({});
+		});
+
+		it('focuses the search input', () => {
+			var input = ReactDOM.findDOMNode(instance.input).querySelector('input');
+			expect(input, 'not to equal', document.activeElement);
+			instance.focus();
+			expect(input, 'to equal', document.activeElement);
 		});
 	});
 });
