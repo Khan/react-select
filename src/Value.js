@@ -94,4 +94,4 @@ const Value = React.createClass({
 
 });
 
-module.exports = Value;
+export default Value;

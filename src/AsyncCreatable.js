@@ -38,4 +38,4 @@ const AsyncCreatable = React.createClass({
 	}
 });
 
-module.exports = AsyncCreatable;
+export default AsyncCreatable;

@@ -283,4 +283,4 @@ function shouldKeyDownEventCreateNewOption ({ keyCode }) {
 	return false;
 };
 
-module.exports = Creatable;
+export default Creatable;
