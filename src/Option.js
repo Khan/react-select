@@ -93,4 +93,4 @@ const Option = React.createClass({
 	}
 });
 
-module.exports = Option;
+export default Option;
