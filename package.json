@@ -58,7 +58,7 @@
     "react-dom": "global:React.__internalReactDOM"
   },
   "scripts": {
-    "build-ka": "npx webpack --config webpack.config.js",
+    "build-ka": "webpack --config webpack.config.js",
     "build": "gulp clean && NODE_ENV=production gulp build",
     "bump": "gulp bump",
     "bump:major": "gulp bump:major",
