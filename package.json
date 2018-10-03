@@ -53,10 +53,6 @@
     "react": "^0.14 || ^15.0.0-rc || ^15.0",
     "react-dom": "^0.14 || ^15.0.0-rc || ^15.0"
   },
-  "browserify-shim": {
-    "react": "global:React",
-    "react-dom": "global:React.__internalReactDOM"
-  },
   "scripts": {
     "build-ka": "webpack --config webpack.config.js",
     "build": "gulp clean && NODE_ENV=production gulp build",
